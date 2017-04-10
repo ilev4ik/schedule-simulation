@@ -1,0 +1,16 @@
+<!DOCTYPE RCC><RCC version="1.0">
+    <qresource prefix="/stuff">
+        <file alias="analytics.txt">res/analytics.txt</file>
+        <file alias="bookkeeping.txt">res/bookkeeping.txt</file>
+        <file alias="development.txt">res/development.txt</file>
+        <file alias="finances.txt">res/finances.txt</file>
+        <file alias="hr.txt">res/hr.txt</file>
+        <file alias="marketing.txt">res/marketing.txt</file>
+        <file alias="purchasing.txt">res/purchasing.txt</file>
+        <file alias="sales.txt">res/sales.txt</file>
+        <file alias="testing.txt">res/testing.txt</file>
+    </qresource>
+    <qresource prefix="/office">
+        <file alias="departments.txt">res/departments.txt</file>
+    </qresource>
+</RCC>

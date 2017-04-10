@@ -88,6 +88,7 @@ class WorkersModel(QAbstractTableModel):
                 raise Exception('resource ' + file_name + ' error while openning')
 
             stream = QTextStream(file)
+            stream.setCodec('UTF-8')
             dep_name = stream.readLine()
             if dep_name[-1] != ':':
                 raise Exception('resource ' + file_name + ' with no department mark')
@@ -95,7 +96,9 @@ class WorkersModel(QAbstractTableModel):
             while not stream.atEnd():
                 count += 1
                 line = stream.readLine()
+
                 (n, s) = line.split()
+
                 self.data_list.append(Worker(n, s, dep_name[:-1], Qt.Unchecked))
 
             if count == 0:
@@ -115,9 +118,10 @@ class Depatment(object):
 
 
 class DepartmentModel(QAbstractListModel):
-    def __init__(self):
+    def __init__(self, checkable=True):
         QAbstractListModel.__init__(self)
         self.data_list = []
+        self.checkable = checkable
         QAbstractListModel.beginResetModel(self)
         self.__readData()
         QAbstractListModel.endResetModel(self)
@@ -125,7 +129,8 @@ class DepartmentModel(QAbstractListModel):
     def flags(self, index=QModelIndex()):
         if not index.isValid():
             return
-        return Qt.ItemIsEnabled | Qt.ItemIsUserCheckable
+        f = Qt.ItemIsEnabled
+        return  f | Qt.ItemIsUserCheckable if self.checkable else f | Qt.ItemIsSelectable
 
     def rowCount(self, parent=QModelIndex(), *args, **kwargs):
         return len(self.data_list)
@@ -137,7 +142,7 @@ class DepartmentModel(QAbstractListModel):
         w = self.data_list[index.row()]
         if role == Qt.DisplayRole:
             return w.name
-        elif role == Qt.CheckStateRole:
+        elif role == Qt.CheckStateRole and self.checkable:
             return w.state
 
         return QVariant()
@@ -154,10 +159,12 @@ class DepartmentModel(QAbstractListModel):
         path = ':/office/'
         file = QFile(path + file_name + '.txt')
 
+
         if not file.open(QIODevice.ReadOnly | QIODevice.Text):
             raise Exception('resource ' + file_name + ' error while openning')
 
         stream = QTextStream(file)
+        stream.setCodec("UTF-8")
         count = 0
         while not stream.atEnd():
             count += 1

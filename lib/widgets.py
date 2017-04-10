@@ -7,6 +7,7 @@ from PyQt5.QtGui import \
     QPainterPath, QRegion, QTransform
 
 from .models import InfoTableView, InfoListView
+from .models import DepartmentModel
 
 # TODO: проверка на корректность
 class FormWidget(QWidget):
@@ -14,7 +15,7 @@ class FormWidget(QWidget):
         QWidget.__init__(self)
         le_name = QLineEdit()
         cb_place = QComboBox()
-
+        cb_place.addItems(['Конференц-зал', 'Помещение отдела', 'Столовая'])
         le_name.setPlaceholderText("Название мероприятия")
 
         vl_secInfo = QVBoxLayout()
@@ -30,6 +31,7 @@ class FormWidget(QWidget):
         fl_participants = QFormLayout()
         # defs
         cb_department = QComboBox()
+        cb_department.setModel(DepartmentModel(False))
         rb_department = QRadioButton('Отдел')
         rb_head = QRadioButton('Руководство')
         rb_workers = QRadioButton('Выбрать сотрудников')

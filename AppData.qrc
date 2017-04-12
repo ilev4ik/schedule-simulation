@@ -1,16 +1,22 @@
 <!DOCTYPE RCC><RCC version="1.0">
     <qresource prefix="/stuff">
-        <file alias="analytics.txt">res/analytics.txt</file>
-        <file alias="bookkeeping.txt">res/bookkeeping.txt</file>
-        <file alias="development.txt">res/development.txt</file>
-        <file alias="finances.txt">res/finances.txt</file>
-        <file alias="hr.txt">res/hr.txt</file>
-        <file alias="marketing.txt">res/marketing.txt</file>
-        <file alias="purchasing.txt">res/purchasing.txt</file>
-        <file alias="sales.txt">res/sales.txt</file>
-        <file alias="testing.txt">res/testing.txt</file>
+        <file alias="analytics.txt">res/data/analytics.txt</file>
+        <file alias="bookkeeping.txt">res/data/bookkeeping.txt</file>
+        <file alias="development.txt">res/data/development.txt</file>
+        <file alias="finances.txt">res/data/finances.txt</file>
+        <file alias="hr.txt">res/data/hr.txt</file>
+        <file alias="marketing.txt">res/data/marketing.txt</file>
+        <file alias="purchasing.txt">res/data/purchasing.txt</file>
+        <file alias="sales.txt">res/data/sales.txt</file>
+        <file alias="testing.txt">res/data/testing.txt</file>
     </qresource>
     <qresource prefix="/office">
-        <file alias="departments.txt">res/departments.txt</file>
+        <file alias="departments.txt">res/data/departments.txt</file>
+    </qresource>
+    <qresource prefix="img">
+        <file alias="cancel.png">res/img/cancel.png</file>
+        <file alias="edit.png">res/img/edit.png</file>
+        <file alias="minus.png">res/img/minus.png</file>
+        <file alias="plus.png">res/img/plus.png</file>
     </qresource>
 </RCC>

@@ -1,13 +1,13 @@
 from PyQt5.QtWidgets import \
     QWidget, QGroupBox, QVBoxLayout, \
     QLineEdit, QLayout, QComboBox, QFormLayout, \
-    QSpinBox, QRadioButton, QCheckBox, QDialogButtonBox, QLabel
+    QSpinBox, QRadioButton, QCheckBox, QDialogButtonBox, QLabel, QTableView, QAbstractItemView
 from PyQt5.QtCore import QRectF
 from PyQt5.QtGui import \
     QPainterPath, QRegion, QTransform
 
 from .models import InfoTableView, InfoListView
-from .models import DepartmentModel
+from .models import DepartmentModel, CalendarModel
 
 # TODO: проверка на корректность
 class FormWidget(QWidget):
@@ -218,3 +218,39 @@ class FilterWidget(QWidget):
     def __onWorkers(self):
         self.itv_workers.show()
         self.ilv_departments.hide()
+
+
+from lib.models import FormDelegate
+
+
+class CalendarWidget(QTableView):
+    def __init__(self, parent=None):
+        QTableView.__init__(self, parent)
+        self.setModel(CalendarModel(12))
+        self.setItemDelegate(FormDelegate())
+        self.setHorizontalScrollMode(QAbstractItemView.ScrollPerItem)
+
+    def resizeEvent(self, event):
+        w = self.viewport().width()
+        h = self.viewport().height()
+        for i in range(0, self.model().columnCount()):
+            self.setColumnWidth(i, w / 7+1)
+
+        for j in range(0, self.model().rowCount()):
+            self.setRowHeight(j, h/9)
+
+    def contextMenuEvent(self, event):
+        QTableView.contextMenuEvent(self, event)
+        e = QContextMenuEvent(event)
+        self.menu = QMenu(self)
+        action = QAction('Добавить событие', self)
+        self.menu.addAction(action)
+        self.menu.popup(QCursor.pos())
+        action.triggered.connect(lambda: self.slot(e.pos()))
+
+    def slot(self, pos):
+        row = self.rowAt(pos.y())
+        col = self.columnAt(pos.x())
+
+        index = self.model().index(row, col)
+

@@ -1,129 +1,14 @@
 from PyQt5.QtWidgets import \
     QWidget, QGroupBox, QVBoxLayout, \
     QLineEdit, QLayout, QComboBox, QFormLayout, \
-    QSpinBox, QRadioButton, QCheckBox, QDialogButtonBox, QLabel
+    QSpinBox, QRadioButton, QCheckBox, QDialogButtonBox, \
+    QLabel, QTableView, QMenu, QAction, QAbstractItemView
 from PyQt5.QtCore import QRectF
 from PyQt5.QtGui import \
-    QPainterPath, QRegion, QTransform
+    QPainterPath, QRegion, QTransform, QCursor, QContextMenuEvent
 
 from .models import InfoTableView, InfoListView
-from .models import DepartmentModel
-
-# TODO: проверка на корректность
-class FormWidget(QWidget):
-    def __init__(self):
-        QWidget.__init__(self)
-        le_name = QLineEdit()
-        cb_place = QComboBox()
-        cb_place.addItems(['Конференц-зал', 'Помещение отдела', 'Столовая'])
-        le_name.setPlaceholderText("Название мероприятия")
-
-        vl_secInfo = QVBoxLayout()
-        fl_duration = QFormLayout()
-
-        sb_duration = QSpinBox()
-        sb_duration.setRange(1, 8)
-        fl_duration.addRow('Длительность (в ч.):', sb_duration)
-
-        gb_participants = QGroupBox()
-        gb_participants.setTitle('Участники')
-
-        fl_participants = QFormLayout()
-        # defs
-        cb_department = QComboBox()
-        cb_department.setModel(DepartmentModel(False))
-        rb_department = QRadioButton('Отдел')
-        rb_head = QRadioButton('Руководство')
-        rb_workers = QRadioButton('Выбрать сотрудников')
-        lw_workers = InfoTableView()
-
-        fl_participants.addRow(rb_department, cb_department)
-        fl_participants.addRow(rb_head)
-        fl_participants.addRow(rb_workers)
-        fl_participants.addRow(lw_workers)
-
-        gb_participants.setLayout(fl_participants)
-
-        vl_secInfo.addLayout(fl_duration)
-        vl_secInfo.addWidget(gb_participants)
-
-        bb_dialog = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        vl_secInfo.addWidget(bb_dialog)
-        gb_secInfo = QGroupBox()
-
-        gb_secInfo.setLayout(vl_secInfo)
-        self.gb_secInfo = gb_secInfo
-        layout = QVBoxLayout()
-        layout.addWidget(le_name)
-        layout.addWidget(cb_place)
-        layout.addWidget(gb_secInfo)
-
-        layout.setSizeConstraint(QLayout.SetFixedSize)
-
-        self.le_name = le_name
-        self.cb_place = cb_place
-        self.vl_secInfo = vl_secInfo
-        self.sb_duration = sb_duration
-        self.cb_department = cb_department
-        self.rb_department = rb_department
-        self.rb_head = rb_head
-        self.rb_workers = rb_workers
-        self.lw_workers = lw_workers
-
-        self.setLayout(layout)
-        self.__setDefaultState()
-        rb_workers.clicked.connect(lw_workers.show)
-        rb_department.clicked.connect(self.__onDeprtment)
-        rb_head.clicked.connect(self.__onHead)
-        rb_workers.clicked.connect(self.__onWorkers)
-
-        bb_dialog.accepted.connect(gb_secInfo.hide)
-        bb_dialog.rejected.connect(self.close)
-
-        self.makeYellow()
-
-    def resizeEvent(self, event):
-        self.resize(self.sizeHint())
-        path = QPainterPath()
-        radius = 10
-        path.addRoundedRect(QRectF(self.rect()), radius, radius)
-        mask = QRegion(path.toFillPolygon(QTransform()).toPolygon())
-        self.setMask(mask)
-        QWidget.resizeEvent(self, event)
-
-    def __setDefaultState(self):
-        self.le_name.clear()
-        self.cb_place.setCurrentIndex(0)
-        self.sb_duration.setValue(1)
-        self.cb_department.setCurrentIndex(0)
-        self.rb_department.setChecked(True)
-        self.rb_head.setChecked(False)
-        self.rb_workers.setChecked(False)
-        self.lw_workers.hide()
-
-    def __onDeprtment(self):
-        self.cb_department.setEnabled(True)
-        self.lw_workers.hide()
-
-    def __onHead(self):
-        self.cb_department.setEnabled(False)
-        self.lw_workers.hide()
-
-    def __onWorkers(self):
-        self.cb_department.setEnabled(False)
-        self.lw_workers.show()
-
-    def showDescription(self):
-        self.gb_secInfo.show()
-
-    def makeWhite(self):
-        self.setStyleSheet("background-color:white;")
-
-    def makeRed(self):
-        self.setStyleSheet("background-color:red;")
-
-    def makeYellow(self):
-        self.setStyleSheet("background-color:yellow;")
+from .models import DepartmentModel, CalendarModel
 
 
 class ParametersWidget(QWidget):
@@ -218,3 +103,41 @@ class FilterWidget(QWidget):
     def __onWorkers(self):
         self.itv_workers.show()
         self.ilv_departments.hide()
+
+
+from lib.models import FormDelegate
+
+
+class CalendarWidget(QTableView):
+    def __init__(self, parent=None):
+        QTableView.__init__(self, parent)
+        self.setModel(CalendarModel(12))
+        self.setItemDelegate(FormDelegate())
+        self.setHorizontalScrollMode(QAbstractItemView.ScrollPerItem)
+
+    def resizeEvent(self, event):
+        w = self.viewport().width()
+        h = self.viewport().height()
+        for i in range(0, self.model().columnCount()):
+            self.setColumnWidth(i, w / 7+1)
+
+        for j in range(0, self.model().rowCount()):
+            self.setRowHeight(j, h/9)
+
+    def contextMenuEvent(self, event):
+        QTableView.contextMenuEvent(self, event)
+        e = QContextMenuEvent(event)
+        self.menu = QMenu(self)
+        action = QAction('Добавить событие', self)
+        self.menu.addAction(action)
+        self.menu.popup(QCursor.pos())
+        action.triggered.connect(lambda: self.slot(e.pos()))
+
+    def slot(self, pos):
+        row = self.rowAt(pos.y())
+        col = self.columnAt(pos.x())
+
+        index = self.model().index(row, col)
+
+
+

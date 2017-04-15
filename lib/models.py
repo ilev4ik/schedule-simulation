@@ -28,23 +28,24 @@ class WorkersModel(QAbstractTableModel):
         if not index.isValid():
             return QVariant()
 
-        w = self.data_list[index.row()]
         if role == Qt.DisplayRole:
             if index.column() == 0:
-                return w.fullName()
+                return self.data_list[index.row()][0].fullName()
             elif index.column() == 1:
-                return w.department
+                return self.data_list[index.row()][0].department
         elif role == Qt.CheckStateRole:
             if index.column() == 0:
-                return w.state
+                return self.data_list[index.row()][1]
 
         return QVariant()
 
     def setData(self, index=QModelIndex(), value=QVariant(), role=None):
         if not index.isValid() or role != Qt.CheckStateRole:
             return False
-        self.data_list[index.row()].switchState()
-        self.dataChanged.emit(index, index)
+
+        if role == Qt.CheckStateRole:
+            self.__switchState(index.row())
+            self.dataChanged.emit(index, index)
         return True
 
     def headerData(self, section, orientation, role=None):
@@ -56,6 +57,12 @@ class WorkersModel(QAbstractTableModel):
                 return range(1, len(self.data_list) + 1)[section]
 
         return QVariant()
+
+    def __switchState(self, row):
+        row_obj = self.data_list[row]
+        states = [Qt.Checked, Qt.Unchecked]
+        states.remove(row_obj[1])
+        row_obj[1] = states[0]
 
     def __readData(self):
         file_list = [
@@ -82,7 +89,7 @@ class WorkersModel(QAbstractTableModel):
 
                 (n, s) = line.split()
 
-                self.data_list.append(Worker(n, s, dep_name[:-1], Qt.Unchecked))
+                self.data_list.append([Worker(n, s, dep_name[:-1]), Qt.Unchecked])
 
             if count == 0:
                 raise Exception('resource ' + file_name + ' has no items')
@@ -110,20 +117,27 @@ class DepartmentModel(QAbstractListModel):
         if not index.isValid():
             return QVariant()
 
-        w = self.data_list[index.row()]
         if role == Qt.DisplayRole:
-            return w.name
+            return self.data_list[index.row()][0].name
         elif role == Qt.CheckStateRole and self.checkable:
-            return w.state
+            return self.data_list[index.row()][1]
 
         return QVariant()
 
     def setData(self, index=QModelIndex(), value=QVariant(), role=None):
         if not index.isValid() or role != Qt.CheckStateRole:
             return False
-        self.data_list[index.row()].switchState()
-        self.dataChanged.emit(index, index)
+
+        if role == Qt.CheckStateRole:
+            self.__switchState(index.row())
+            self.dataChanged.emit(index, index)
         return True
+
+    def __switchState(self, row):
+        row_obj = self.data_list[row]
+        states = [Qt.Checked, Qt.Unchecked]
+        states.remove(row_obj[1])
+        row_obj[1] = states[0]
 
     def __readData(self):
         file_name = 'departments'
@@ -139,7 +153,7 @@ class DepartmentModel(QAbstractListModel):
         while not stream.atEnd():
             count += 1
             line = stream.readLine()
-            self.data_list.append(Department(line, Qt.Checked))
+            self.data_list.append([Department(line), Qt.Checked])
 
         if count == 0:
             raise Exception('resource ' + file_name + ' has no items')

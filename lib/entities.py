@@ -1,32 +1,22 @@
 from PyQt5.Qt import *
 
 class Worker(object):
-    def __init__(self, fname, lname, dep, s):
+    def __init__(self, fname, lname, dep):
         object.__init__(self)
         self.name = fname
         self.surname = lname
         self.department = dep
-        self.state = s
 
-    def switchState(self):
-        states = [Qt.Checked, Qt.Unchecked]
-        states.remove(self.state)
-        self.state = states[0]
+
 
     def fullName(self):
         return self.name + ' ' + self.surname
 
 
 class Department(object):
-    def __init__(self, name, s):
+    def __init__(self, name):
         object.__init__(self)
         self.name = name
-        self.state = s
-
-    def switchState(self):
-        states = [Qt.Checked, Qt.Unchecked]
-        states.remove(self.state)
-        self.state = states[0]
 
 
 class Experiment(object):

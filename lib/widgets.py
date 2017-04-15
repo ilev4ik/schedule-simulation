@@ -228,8 +228,6 @@ class FilterWidget(QWidget):
         self.ilv_departments.hide()
 
 
-
-
 class FormDelegate(QStyledItemDelegate):
     def __init__(self):
         self.form_pixmap = None
@@ -327,9 +325,10 @@ class ChoiceWidget(QWidget):
 
 
 class ExpandingButton(QPushButton):
-    def __init__(self, icon_path, parent=None):
+    def __init__(self, icon_path=None, parent=None):
         QPushButton.__init__(self, parent)
-        self.setIcon(QIcon(icon_path))
+        if icon_path is not None:
+            self.setIcon(QIcon(icon_path))
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
 # TODO: проверка на корректность

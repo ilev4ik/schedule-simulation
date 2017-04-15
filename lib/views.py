@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QTableView, QAbstractItemView, QHeaderView, QListVie
 from .tools import getTableContentFitWidth
 from .models import WorkersModel, DepartmentModel
 
+
 class InfoTableView(QTableView):
     def __init__(self):
         QTableView.__init__(self)

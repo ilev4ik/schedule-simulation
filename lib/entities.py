@@ -1,4 +1,4 @@
-from PyQt5 import Qt
+from PyQt5.Qt import *
 
 class Worker(object):
     def __init__(self, fname, lname, dep, s):

@@ -19,4 +19,7 @@
         <file alias="minus.png">res/img/minus.png</file>
         <file alias="plus.png">res/img/plus.png</file>
     </qresource>
+    <qresource prefix="schedule">
+        <file alias="default.txt">res/data/default_schedule.txt</file>
+    </qresource>
 </RCC>

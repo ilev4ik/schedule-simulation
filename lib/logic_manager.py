@@ -5,3 +5,7 @@ class LogicManager(object):
     @staticmethod
     def custom_print(a):
         print(a*10)
+
+    @staticmethod
+    def check_collisions(event, calendar):
+        pass

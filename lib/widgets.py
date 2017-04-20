@@ -187,12 +187,12 @@ class FormDelegate(QStyledItemDelegate):
         row = index.row()
         col = index.column()
         data = index.model().matrix_data[row][col]
-        data.append(editor.getNewEvent())
-        print(data)
+        data.extend(editor.getNewEvent())
 
 class ChoiceWidget(QWidget):
     def __init__(self, day, time, title_list, department_list, parent):
         QWidget.__init__(self, parent)
+        self.__newEvent = []
         self.title_list = title_list
         self.setFocusPolicy(Qt.StrongFocus)
         self.__setUi()
@@ -223,7 +223,7 @@ class ChoiceWidget(QWidget):
 
     def __onPlus(self):
         self.form.exec()
-        self.__newEvent = self.form.getEvent()
+        self.__newEvent.append(self.form.getEvent())
 
     def getNewEvent(self):
         return self.__newEvent
@@ -297,12 +297,12 @@ class FormDialog(QDialog):
         else:
             type = ScheduleEvent.Type.EMPL
             part_list = self.lw_workers.model().getCheckedWorkers()
-        self.event = ScheduleEvent(title=self.le_name,
-                                   annotation=self.te_description,
+        self.event = ScheduleEvent(title=self.le_name.text(),
+                                   annotation=self.te_description.toPlainText(),
                                    day=self.day,
                                    time=self.time,
                                    duration=self.sb_duration.value(),
-                                   location=self.cb_place,
+                                   location=self.cb_place.currentText(),
                                    type=type,
                                    part_list=part_list
                                    )

@@ -122,10 +122,10 @@ class FilterWidget(QWidget):
 
 from PyQt5.QtGui import QFont
 class CalendarWidget(QTableView):
-    def __init__(self, days, matrix_data, parent=None):
+    def __init__(self, calendar, parent=None):
         QTableView.__init__(self, parent)
         self.setFont(QFont('Arial', 9, QFont.StyleItalic))
-        self.setModel(CalendarModel(days, matrix_data))
+        self.setModel(CalendarModel(calendar))
         self.setHorizontalScrollMode(QAbstractItemView.ScrollPerItem)
 
     def setFormData(self, department_list):
@@ -172,7 +172,7 @@ class TitleDialog(QDialog):
         self.setLayout(layout)
         self.setFixedWidth(400)
 
-
+from lib.logic_manager import LogicManager
 class FormDelegate(QStyledItemDelegate):
     def __init__(self, department_list):
         QStyledItemDelegate.__init__(self)
@@ -181,19 +181,19 @@ class FormDelegate(QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         row = index.row()
         col = index.column()
-        item = index.model().matrix_data[row][col]
+        item = index.model().calendar.matrix[row][col]
         return ChoiceWidget(col, row*100+1000, index.data().split('\n')[:-1], self.department_list, parent)
 
     def setModelData(self, editor, model, index):
         row = index.row()
         col = index.column()
-        matrix_data = index.model().matrix_data
-        data = matrix_data[row][col] # вот твой календарь
-        # не. ща)) этот календарь я отправлю в аргументы функции? да поняла
-        # период запихнем ща в модель, сможешь оттуда взять index.model().period ok.
-        # вообще календарь в модели должен быть же. Время коммита)
-        # вот здесь надо проверять ок не удаляем коммент)
-        data.extend(editor.getNewEvent())
+        calendar = index.model().calendar
+        data = calendar.matrix[row][col]
+
+        # TODO здесь проверяем коллизии после формочки
+        event_to_add = editor.getNewEvent()
+        if LogicManager.check_collisions(calendar, event_to_add):
+            data.extend(event_to_add)
 
 class ChoiceWidget(QWidget):
     def __init__(self, day, time, title_list, department_list, parent):

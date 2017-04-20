@@ -102,16 +102,9 @@ class ScheduleEvent(object):
     def getTitle(self):
         return self.__title
 
+
 class Calendar(object):
-    def __init__(self, event_list: [ScheduleEvent]):
-        self.event_list = event_list
-
-    def __checkCollisions(self):
-        pass
-
-
-class Experiment(object):
-    def __init__(self, event_list, period):
+    def __init__(self, matrix):
         self.currentTime = 0.0
-        self.calendar = Calendar(event_list)
-        self.period = period
+        self.matrix = matrix
+        self.period = len(matrix) # кол-во столбцов TODO проверить это

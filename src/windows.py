@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QMainWindow, QDockWidget, QTabWidget, \
 from PyQt5.QtGui import QKeySequence
 
 from lib.widgets import ParametersWidget, FilterWidget, CalendarWidget, FormWidget
-from lib.entities import Department, Employee, ScheduleEvent
+from lib.entities import Department, Employee, ScheduleEvent, Firm, Human
 
 
 class MainWindow(QMainWindow):
@@ -15,11 +15,24 @@ class MainWindow(QMainWindow):
         'sales', 'testing'
     ]
 
+    dep_name_list = [
+        'Аналитический отдел',
+        'Бухгалтерия',
+        'Отдел закупок',
+        'Отдел кадров',
+        'Отдел маркетинга',
+        'Отдел разработки',
+        'Отдел продаж',
+        'Отдел тестирования',
+        'Финансовый отдел'
+    ]
+
     def __init__(self):
         QMainWindow.__init__(self)
         MainWindow.departments_committed = pyqtSignal(list)
 
         data = self.__readDepartmentsData()
+        self.firm = Firm(Human('Иван', 'Попов'), data)
 
         self.setWindowTitle('Симулятор офисного расписания')
 
@@ -47,7 +60,8 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.BottomDockWidgetArea, console)
 
         # Calendar
-        self.calendar = CalendarWidget(7, [], self)
+        init_matrix = [[[] for i in range(0, 7)] for j in range(0, 9)]
+        self.calendar = CalendarWidget(7, init_matrix, self)
         self.setCentralWidget(self.calendar)
 
         self.tabs = tabs
@@ -85,16 +99,18 @@ class MainWindow(QMainWindow):
 
     def __onStartAction(self):
         checked_departments = self.params_widget.getModel().getCheckedDepartmentList()
+        self.checked_departments = checked_departments
         if len(checked_departments) == 0:
             self.tabs.widget(0).addItem('Ошибка [параметры]: выберите хотя бы один отдел')
             return
-        days = self.params_widget.sb_period.value()
+        num_of_days = self.params_widget.sb_period.value()
+        self.Matrix = [[[] for i in range(0, num_of_days)] for j in range(0, 9)]
 
         if self.params_widget.chb_defaultSchedule.isChecked():
-            self.__readDefaultSchedule(days)
+            self.__readDefaultSchedule(num_of_days)
 
         self.filter_dock.setWidget(FilterWidget(checked_departments))
-        self.calendar = CalendarWidget(days, checked_departments, self)
+        self.calendar = CalendarWidget(num_of_days, self.Matrix, self)
         self.calendar.setFormData(checked_departments)
         self.setCentralWidget(self.calendar)
         self.addDockWidget(Qt.RightDockWidgetArea, self.filter_dock)
@@ -187,8 +203,7 @@ class MainWindow(QMainWindow):
         controlToolBar.addAction(self.finishAction)
         controlToolBar.addAction(self.pauseAction)
 
-    def __readDefaultSchedule(self, days):
-        event_list = [] # of ScheduleEvent
+    def __readDefaultSchedule(self, num_of_days):
         file_name = 'default'
         file = QFile(':/schedule/' + file_name + '.txt')
 
@@ -197,20 +212,51 @@ class MainWindow(QMainWindow):
 
         stream = QTextStream(file)
         stream.setCodec('UTF-8')
-        Matrix = [[None for i in range(0,8)] for j in range(0,days)]
-        print(Matrix)
-        # day_dict = {}.fromkeys(['Понедельник','Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'], )
+
+        Matrix = [[[] for i in range(0, num_of_days)] for j in range(0, 9)]
+        days_of_week = ['', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
         while not stream.atEnd():
             week_day = stream.readLine()[:-1]
-            print(week_day)
             line = stream.readLine()
             while line:
-                print(line)
+                params_of_event = line.split(',')
+                time = int(params_of_event[0].replace(':', ''))
+                duration = int(params_of_event[1])
+                title = params_of_event[2]
+                location = params_of_event[3]
+                department = params_of_event[4]
+                start_day_number = days_of_week.index(week_day)
+                days_list = [k for k in range(start_day_number, num_of_days, 7)]
+
+                type = ScheduleEvent.Type.HEAD if department == 'Руководство' else ScheduleEvent.Type.DEP
+                participants_list = []
+                if type == ScheduleEvent.Type.HEAD:
+                    participants_list.append(self.firm.getBoss())
+                    for dep in self.checked_departments:
+                        participants_list.append(dep.getBoss())
+                elif type == ScheduleEvent.Type.DEP:
+                    for dep in self.checked_departments:
+                        if dep.getName() == department:
+                            participants_list.extend(dep.getEmployeeList())
+                else:
+                    raise Exception('Error while processing default schedule data: TYPE')
+                for day in days_list:
+                    Matrix[int(time/100)-10][day-1].append(ScheduleEvent(time=time,
+                                                               duration=duration,
+                                                               title=title,
+                                                               location=location,
+                                                               type=type,
+                                                               part_list=participants_list,
+                                                               day=day
+                                                               )
+                                                 )
                 line = stream.readLine()
 
+        print(Matrix)
+        self.Matrix = Matrix
 
     def __readDepartmentsData(self):
-        department_list = [] # of Department
+        department_list = []  # of Department
         for file_name in MainWindow.dep_file_name_list:
             count = 0
             file = QFile(':/stuff/' + file_name + '.txt')
@@ -230,9 +276,9 @@ class MainWindow(QMainWindow):
                 count += 1
                 (n, s) = stream.readLine().split()
                 if count == 1:
-                    new_dep_obj.setBoss(Employee(n,s))
+                    new_dep_obj.setBoss(Employee(n, s))
                 else:
-                    new_dep_obj.addEmployee(Employee(n,s))
+                    new_dep_obj.addEmployee(Employee(n, s))
 
             if count == 0:
                 raise Exception('resource ' + file_name + ' has no items')

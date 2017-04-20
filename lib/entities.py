@@ -42,7 +42,6 @@ class Department(object):
         __str.append('Работники: ' + ', '.join([empl for empl in self.__employee_list]))
         return '\n'.join(__str) + '\n'
 
-
     def setBoss(self, new_boss: Employee):
         self.__boss = new_boss
 
@@ -65,6 +64,9 @@ class Firm(object):
             dep_list=[]
         self.__dep_list = dep_list
         self.__boss = boss
+
+    def getBoss(self):
+        return self.__boss
 
 
 class ScheduleEvent(object):
@@ -96,6 +98,9 @@ class ScheduleEvent(object):
                 self.part_list = value
             else:
                 raise KeyError()
+
+    def getTitle(self):
+        return self.__title
 
 class Calendar(object):
     def __init__(self, event_list: [ScheduleEvent]):

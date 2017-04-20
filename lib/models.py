@@ -121,10 +121,10 @@ class DepartmentModel(QAbstractListModel):
 
 
 class CalendarModel(QAbstractTableModel):
-    def __init__(self, cols, data):
+    def __init__(self, cols, matrix_data):
         QAbstractTableModel.__init__(self)
         self.col_num = cols
-        self.data = data
+        self.matrix_data = matrix_data
 
     def flags(self, index=QModelIndex()):
         if not index.isValid():
@@ -138,9 +138,18 @@ class CalendarModel(QAbstractTableModel):
     def columnCount(self, parent=None, *args, **kwargs):
         return self.col_num
 
-    def data(self, QModelIndex, role=None):
-        # if role == Qt.DisplayRole:
-        #     return 'hmm'
+    def data(self, index, role=None):
+        row = index.row()
+        col = index.column()
+
+        if index.isValid():
+            if role == Qt.DisplayRole:
+                event_list = self.matrix_data[row][col]
+                str = ""
+                for event in event_list:
+                    str += (event.getTitle() + '\n')
+
+                return str
 
         return QVariant()
 

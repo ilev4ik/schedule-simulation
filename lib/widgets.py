@@ -122,9 +122,9 @@ class FilterWidget(QWidget):
 
 
 class CalendarWidget(QTableView):
-    def __init__(self, days, data, parent=None):
+    def __init__(self, days, matrix_data, parent=None):
         QTableView.__init__(self, parent)
-        self.setModel(CalendarModel(days, data))
+        self.setModel(CalendarModel(days, matrix_data))
         self.setHorizontalScrollMode(QAbstractItemView.ScrollPerItem)
 
     def setFormData(self, department_list):

@@ -1,4 +1,4 @@
-from PyQt5.Qt import *
+from PyQt5.QtCore import Qt
 
 from PyQt5.QtWidgets import \
     QWidget, QGroupBox, QVBoxLayout, \
@@ -12,7 +12,7 @@ from PyQt5.QtGui import \
     QPainterPath, QRegion, QTransform, QContextMenuEvent, \
     QIcon
 from PyQt5.QtGui import QCursor
-from PyQt5.Qt import pyqtSignal
+from PyQt5.QtCore import pyqtSignal
 
 from .views import InfoTableView, InfoListView
 from .models import DepartmentModel, CalendarModel, WorkersModel
@@ -63,7 +63,7 @@ class FilterWidget(QWidget):
         QWidget.__init__(self)
         gb_filtering = QGroupBox()
         gb_filtering.setTitle('Параметры отображения')
-
+#норма
         fl_filtering = QFormLayout()
         rb_firm = QRadioButton()
         rb_department = QRadioButton()
@@ -120,10 +120,11 @@ class FilterWidget(QWidget):
         self.itv_workers.show()
         self.ilv_departments.hide()
 
-
+from PyQt5.QtGui import QFont
 class CalendarWidget(QTableView):
     def __init__(self, days, matrix_data, parent=None):
         QTableView.__init__(self, parent)
+        self.setFont(QFont('Arial', 9, QFont.StyleItalic))
         self.setModel(CalendarModel(days, matrix_data))
         self.setHorizontalScrollMode(QAbstractItemView.ScrollPerItem)
 
@@ -139,20 +140,20 @@ class CalendarWidget(QTableView):
         for j in range(0, self.model().rowCount()):
             self.setRowHeight(j, h/9)
 
-    def contextMenuEvent(self, event):
-        QTableView.contextMenuEvent(self, event)
-        e = QContextMenuEvent(event)
-        self.menu = QMenu(self)
-        action = QAction('Добавить событие', self)
-        self.menu.addAction(action)
-        self.menu.popup(QCursor.pos())
-        action.triggered.connect(lambda: self.slot(e.pos()))
-
-    def slot(self, pos):
-        row = self.rowAt(pos.y())
-        col = self.columnAt(pos.x())
-
-        index = self.model().index(row, col)
+    # def contextMenuEvent(self, event):
+    #     QTableView.contextMenuEvent(self, event)
+    #     e = QContextMenuEvent(event)
+    #     self.menu = QMenu(self)
+    #     action = QAction('Добавить событие', self)
+    #     self.menu.addAction(action)
+    #     self.menu.popup(QCursor.pos())
+    #     action.triggered.connect(lambda: self.slot(e.pos()))
+    #
+    # def slot(self, pos):
+    #     row = self.rowAt(pos.y())
+    #     col = self.columnAt(pos.x())
+    #
+    #     index = self.model().index(row, col)
 
 
 class TitleDialog(QDialog):
@@ -186,7 +187,12 @@ class FormDelegate(QStyledItemDelegate):
     def setModelData(self, editor, model, index):
         row = index.row()
         col = index.column()
-        data = index.model().matrix_data[row][col]
+        matrix_data = index.model().matrix_data
+        data = matrix_data[row][col] # вот твой календарь
+        # не. ща)) этот календарь я отправлю в аргументы функции? да поняла
+        # период запихнем ща в модель, сможешь оттуда взять index.model().period ok.
+        # вообще календарь в модели должен быть же. Время коммита)
+        # вот здесь надо проверять ок не удаляем коммент)
         data.extend(editor.getNewEvent())
 
 class ChoiceWidget(QWidget):
@@ -206,7 +212,6 @@ class ChoiceWidget(QWidget):
 
     def __setUi(self):
         l = QGridLayout()
-        # TODO auto fill background
 
         self.pb_plus = ExpandingButton(':/img/plus.png')
         self.pb_minus = ExpandingButton(':/img/minus.png')

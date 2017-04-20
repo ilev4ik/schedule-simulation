@@ -1,4 +1,4 @@
-from PyQt5.Qt import Qt
+from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSignal, QFile, QIODevice, QTextStream
 from PyQt5.QtWidgets import QMainWindow, QDockWidget, QTabWidget, \
     QListWidget, QAction, QStyle

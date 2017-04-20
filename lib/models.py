@@ -1,5 +1,5 @@
-from PyQt5.Qt import *
-from PyQt5.QtCore import QAbstractTableModel, QModelIndex, QVariant
+from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QAbstractTableModel, QAbstractListModel, QModelIndex, QVariant
 
 from .entities import Department, Employee
 
@@ -160,6 +160,8 @@ class CalendarModel(QAbstractTableModel):
                     str += (event.getTitle() + '\n')
 
                 return str
+            elif role == Qt.TextAlignmentRole:
+                return Qt.AlignHCenter | Qt.AlignTop
 
         return QVariant()
 

@@ -109,19 +109,9 @@ class Calendar(object):
     def __checkCollisions(self):
         pass
 
-    def addEvent(self, event: ScheduleEvent):
-        pass
-
-    # TODO datetime?
-    def removeEvent(self, day: int, time: str, loc):
-        pass
-
 
 class Experiment(object):
-    def __init__(self):
+    def __init__(self, event_list, period):
         self.currentTime = 0.0
-        self.calendar = Calendar(events_list)
+        self.calendar = Calendar(event_list)
         self.period = period
-        # количество отделов
-        self.amount_of_deps = amount_deps
-        self.owner_is_boss = boss

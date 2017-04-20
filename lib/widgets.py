@@ -17,7 +17,7 @@ from PyQt5.Qt import pyqtSignal
 from .views import InfoTableView, InfoListView
 from .models import DepartmentModel, CalendarModel, WorkersModel
 
-from .entities import Department
+from .entities import Department, ScheduleEvent
 
 
 class ParametersWidget(QWidget):
@@ -155,26 +155,45 @@ class CalendarWidget(QTableView):
         index = self.model().index(row, col)
 
 
+class TitleDialog(QDialog):
+    def __init__(self, title_list):
+        QDialog.__init__(self)
+        layout = QVBoxLayout(self)
+        self.cb_title = QComboBox()
+        for title in title_list:
+            self.cb_title.addItem(title)
+        db_cont = QDialogButtonBox()
+        db_cont.addButton(QPushButton('Отмена'), QDialogButtonBox.RejectRole)
+        db_cont.addButton(QPushButton('Выбрать'), QDialogButtonBox.AcceptRole)
+        self.db_cont = db_cont
+        layout.addWidget(self.cb_title)
+        layout.addWidget(self.db_cont)
+        self.setLayout(layout)
+        self.setFixedWidth(400)
+
+
 class FormDelegate(QStyledItemDelegate):
     def __init__(self, department_list):
         QStyledItemDelegate.__init__(self)
         self.department_list = department_list
 
     def createEditor(self, parent, option, index):
-        return ChoiceWidget(self.department_list, parent)
+        row = index.row()
+        col = index.column()
+        item = index.model().matrix_data[row][col]
+        return ChoiceWidget(col, row*100+1000, index.data().split('\n')[:-1], self.department_list, parent)
 
-
-    # def paint(self, painter, option, index):
-    #     if self.form_pixmap is not None:
-    #         painter.drawPixmap(option.rect, self.form_pixmap)
-    #         QStyledItemDelegate.paint(self, painter, option, index)
-    #     QStyledItemDelegate.paint(self, painter, option, index)
-
+    def setModelData(self, editor, model, index):
+        row = index.row()
+        col = index.column()
+        data = index.model().matrix_data[row][col]
+        data.append(editor.getNewEvent())
+        print(data)
 
 class ChoiceWidget(QWidget):
-    def __init__(self, department_list, parent):
+    def __init__(self, day, time, title_list, department_list, parent):
         QWidget.__init__(self, parent)
-        self.autoFillBackground()
+        self.title_list = title_list
         self.setFocusPolicy(Qt.StrongFocus)
         self.__setUi()
 
@@ -183,16 +202,12 @@ class ChoiceWidget(QWidget):
         self.pb_edit.clicked.connect(self.__onEdit)
         self.pb_cancel.clicked.connect(self.__onCancel)
 
-        self.form = FormWidget(department_list)
-
-    def setPersistentInfo(self):
-        b = QPushButton('HAHA')
-        self.l = QVBoxLayout()
-        self.l.addWidget(b)
-        print('hahahhaha')
+        self.form = FormDialog(day, time, department_list)
 
     def __setUi(self):
         l = QGridLayout()
+        # TODO auto fill background
+
         self.pb_plus = ExpandingButton(':/img/plus.png')
         self.pb_minus = ExpandingButton(':/img/minus.png')
         self.pb_edit = ExpandingButton(':/img/edit.png')
@@ -207,13 +222,21 @@ class ChoiceWidget(QWidget):
         self.setLayout(l)
 
     def __onPlus(self):
-        self.form.show()
+        self.form.exec()
+        self.__newEvent = self.form.getEvent()
+
+    def getNewEvent(self):
+        return self.__newEvent
 
     def __onMinus(self):
-        print(-1)
+        dialog = TitleDialog(self.title_list)
+        dialog.setWindowTitle('Удаление события')
+        dialog.exec()
 
     def __onEdit(self):
-        print(1)
+        dialog = TitleDialog(self.title_list)
+        dialog.setWindowTitle('Редактирование события')
+        dialog.exec()
 
     def __onCancel(self):
         self.close()
@@ -226,14 +249,16 @@ class ExpandingButton(QPushButton):
             self.setIcon(QIcon(icon_path))
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-# TODO: проверка на корректность
-# TODO: Cancel & OK naming
-class FormWidget(QWidget):
+
+class FormDialog(QDialog):
     hid = pyqtSignal()
 
-    def __init__(self, department_list, parent=None):
-        QWidget.__init__(self, parent)
-
+    def __init__(self, day, time, department_list, parent=None):
+        QDialog.__init__(self)
+        self.department_list = department_list
+        self.day = day
+        self.time = time
+        self.setAutoFillBackground(True)
         self.__setUi()
         self.__dataInit(department_list)
 
@@ -245,10 +270,46 @@ class FormWidget(QWidget):
 
         self.bb_dialog.helpRequested.connect(self.__onPreview)
         self.bb_dialog.accepted.connect(self.__saveResults)
-        self.bb_dialog.rejected.connect(self.close)
+        self.bb_dialog.rejected.connect(self.__onClose)
+
+    def __onClose(self):
+        self.event = []
+        self.close()
 
     def __saveResults(self):
-        pass
+        if len(self.le_name.text()) == 0:
+            self.le_name.insert('Ошибка! Название не введено!')
+            self.le_name.setStyleSheet("color:red")
+            return
+
+        type = None
+        part_list = []
+        if self.rb_department.isChecked():
+            type = ScheduleEvent.Type.DEP
+            dep_name = self.cb_department.currentText()
+            for dep in self.department_list:
+                if dep_name == dep.getName():
+                    part_list = dep.getEmployeeList()
+        elif self.rb_head.isChecked():
+            type = ScheduleEvent.Type.HEAD
+            for dep in self.department_list:
+                part_list.append(dep.getBoss())
+        else:
+            type = ScheduleEvent.Type.EMPL
+            part_list = self.lw_workers.model().getCheckedWorkers()
+        self.event = ScheduleEvent(title=self.le_name,
+                                   annotation=self.te_description,
+                                   day=self.day,
+                                   time=self.time,
+                                   duration=self.sb_duration.value(),
+                                   location=self.cb_place,
+                                   type=type,
+                                   part_list=part_list
+                                   )
+        self.close()
+
+    def getEvent(self):
+        return self.event
 
     def __dataInit(self, new_dep_list):
         self.cb_department.setModel(DepartmentModel(new_dep_list))
@@ -284,7 +345,7 @@ class FormWidget(QWidget):
         path.addRoundedRect(QRectF(self.rect()), radius, radius)
         mask = QRegion(path.toFillPolygon(QTransform()).toPolygon())
         self.setMask(mask)
-        QWidget.resizeEvent(self, event)
+        QDialog.resizeEvent(self, event)
 
     def __setDefaultState(self):
         self.le_name.clear()

@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QApplication
 
 from src.application import ScheduleSimulation
 
-
 import resources
 
 if __name__ == '__main__':

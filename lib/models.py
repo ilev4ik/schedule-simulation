@@ -11,6 +11,16 @@ class WorkersModel(QAbstractTableModel):
         for dep in checked_departments:
             self.data_list.extend([[empl.getFullName(), dep.getName(), Qt.Checked] for empl in dep.getEmployeeList()])
 
+    def getCheckedWorkers(self):
+        worker_ret_list = []
+        for checkable_worker in self.data_list:
+            empl = Employee(checkable_worker[0], checkable_worker[1])
+            state = checkable_worker[2]
+            if state == Qt.Checked:
+                worker_ret_list.append(empl)
+
+        return worker_ret_list
+
     def flags(self, index=QModelIndex()):
         if index.column() == 0:
             return Qt.ItemIsEnabled | Qt.ItemIsUserCheckable

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QMainWindow, QDockWidget, QTabWidget, \
     QListWidget, QAction, QStyle
 from PyQt5.QtGui import QKeySequence
 
-from lib.widgets import ParametersWidget, FilterWidget, CalendarWidget, FormWidget
+from lib.widgets import ParametersWidget, FilterWidget, CalendarWidget, FormDialog
 from lib.entities import Department, Employee, ScheduleEvent, Firm, Human
 
 
@@ -240,8 +240,10 @@ class MainWindow(QMainWindow):
                             participants_list.extend(dep.getEmployeeList())
                 else:
                     raise Exception('Error while processing default schedule data: TYPE')
+
                 for day in days_list:
-                    Matrix[int(time/100)-10][day-1].append(ScheduleEvent(time=time,
+                    if len(participants_list) != 0:
+                        Matrix[int(time/100)-10][day-1].append(ScheduleEvent(time=time,
                                                                duration=duration,
                                                                title=title,
                                                                location=location,
@@ -252,7 +254,6 @@ class MainWindow(QMainWindow):
                                                  )
                 line = stream.readLine()
 
-        print(Matrix)
         self.Matrix = Matrix
 
     def __readDepartmentsData(self):

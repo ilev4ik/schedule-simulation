@@ -9,5 +9,5 @@ if __name__ == '__main__':
     app = QApplication(argv)
     schedule = ScheduleSimulation()
     schedule.run()
-    LogicManager.custom_print(1)
+
     app.exec()

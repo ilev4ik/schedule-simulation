@@ -4,8 +4,8 @@ from PyQt5.QtWidgets import QMainWindow, QDockWidget, QTabWidget, \
     QListWidget, QAction, QStyle
 from PyQt5.QtGui import QKeySequence
 
-from lib.widgets import ParametersWidget, FilterWidget, CalendarWidget, FormDialog
-from lib.entities import Department, Employee, ScheduleEvent, Firm, Human
+from lib.widgets import ParametersWidget, FilterWidget, CalendarWidget
+from lib.entities import Department, Employee, ScheduleEvent, Firm, Human, Calendar
 
 
 class MainWindow(QMainWindow):
@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
 
         # Calendar
         init_matrix = [[[] for i in range(0, 7)] for j in range(0, 9)]
-        self.calendar = CalendarWidget(7, init_matrix, self)
+        self.calendar = CalendarWidget(Calendar(init_matrix), self)
         self.setCentralWidget(self.calendar)
 
         self.tabs = tabs
@@ -110,7 +110,7 @@ class MainWindow(QMainWindow):
             self.__readDefaultSchedule(num_of_days)
 
         self.filter_dock.setWidget(FilterWidget(checked_departments))
-        self.calendar = CalendarWidget(num_of_days, self.Matrix, self)
+        self.calendar = CalendarWidget(Calendar(self.Matrix), self)
         self.calendar.setFormData(checked_departments)
         self.setCentralWidget(self.calendar)
         self.addDockWidget(Qt.RightDockWidgetArea, self.filter_dock)

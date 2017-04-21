@@ -61,8 +61,8 @@ class MainWindow(QMainWindow):
 
         # Calendar
         init_matrix = [[[] for i in range(0, 7)] for j in range(0, 9)]
-        self.calendar = CalendarWidget(Calendar(init_matrix), self)
-        self.setCentralWidget(self.calendar)
+        self.calendar_widget = CalendarWidget(Calendar(init_matrix), self)
+        self.setCentralWidget(self.calendar_widget)
 
         self.tabs = tabs
 
@@ -84,15 +84,14 @@ class MainWindow(QMainWindow):
         self.centralWidget().setEnabled(False)
         self.filter_dock.hide()
 
-    def __clearCalendar(self):
-        pass
-
     def __onCancelAction(self):
         self.tabs.widget(0).addItem('Сбросить параметры моделирования')
         self.__setDefaultState()
 
     def __onResetAction(self):
         self.tabs.widget(0).addItem('Очистить календарь')
+        self.calendar_widget.clear_widget()
+        self.repaint()
 
     def __onPauseAction(self):
         self.tabs.widget(0).addItem('Пауза моделирования')
@@ -110,9 +109,9 @@ class MainWindow(QMainWindow):
             self.__readDefaultSchedule(num_of_days)
 
         self.filter_dock.setWidget(FilterWidget(checked_departments))
-        self.calendar = CalendarWidget(Calendar(self.Matrix), self)
-        self.calendar.setFormData(checked_departments)
-        self.setCentralWidget(self.calendar)
+        self.calendar_widget = CalendarWidget(Calendar(self.Matrix), self)
+        self.calendar_widget.setFormData(checked_departments)
+        self.setCentralWidget(self.calendar_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.filter_dock)
         self.params_dock.setEnabled(False)
         self.newAction.setEnabled(True)

@@ -108,4 +108,3 @@ class Calendar(object):
         self.currentTime = 0.0
         self.matrix = matrix
         self.period = len(matrix[0])
-        print(self.period)

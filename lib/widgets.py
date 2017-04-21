@@ -140,20 +140,9 @@ class CalendarWidget(QTableView):
         for j in range(0, self.model().rowCount()):
             self.setRowHeight(j, h/9)
 
-    # def contextMenuEvent(self, event):
-    #     QTableView.contextMenuEvent(self, event)
-    #     e = QContextMenuEvent(event)
-    #     self.menu = QMenu(self)
-    #     action = QAction('Добавить событие', self)
-    #     self.menu.addAction(action)
-    #     self.menu.popup(QCursor.pos())
-    #     action.triggered.connect(lambda: self.slot(e.pos()))
-    #
-    # def slot(self, pos):
-    #     row = self.rowAt(pos.y())
-    #     col = self.columnAt(pos.x())
-    #
-    #     index = self.model().index(row, col)
+    def clear_widget(self):
+        self.clearSelection()
+        self.model().clear_data()
 
 
 class TitleDialog(QDialog):

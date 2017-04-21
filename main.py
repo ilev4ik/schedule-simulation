@@ -2,7 +2,7 @@ from sys import argv
 from PyQt5.QtWidgets import QApplication
 
 from src.application import ScheduleSimulation
-from lib.logic_manager import LogicManager
+
 import resources
 
 if __name__ == '__main__':

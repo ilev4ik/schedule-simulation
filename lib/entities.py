@@ -107,5 +107,5 @@ class Calendar(object):
     def __init__(self, matrix):
         self.currentTime = 0.0
         self.matrix = matrix
-        self.period = len(matrix) # кол-во столбцов TODO проверить это
+        self.period = len(matrix[0])
         print(self.period)

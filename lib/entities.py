@@ -102,10 +102,18 @@ class ScheduleEvent(object):
     def getTitle(self):
         return self.__title
 
+    def getDay(self):
+        return self.__day
+
+    def getTime(self):
+        return self.__time
+
+    def gatLocation(self):
+        return self.__location
+
 
 class Calendar(object):
     def __init__(self, matrix):
         self.currentTime = 0.0
         self.matrix = matrix
         self.period = len(matrix[0])
-        print(self.period)

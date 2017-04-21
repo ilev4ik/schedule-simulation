@@ -134,7 +134,6 @@ class CalendarModel(QAbstractTableModel):
     def __init__(self, calendar):
         QAbstractTableModel.__init__(self)
         self.calendar = calendar
-        print(calendar.period)
 
     def flags(self, index=QModelIndex()):
         if not index.isValid():

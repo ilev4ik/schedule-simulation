@@ -191,14 +191,10 @@ class FormDelegate(QStyledItemDelegate):
         data = calendar.matrix[row][col]
 
         event_to_add = editor.getNewEvent()
-        if LogicManager.check_collisions(calendar, event_to_add):
-            data.extend(event_to_add) # ваще всё по науке . Поняла, что сделали? да, взяли новое событие, если всё, дбавили.
-            # а вот если не ок? то ничего не поменялось а сообщение вывести?
-            # oops i did again тынц-тныц) ну ща подумаю мы говорили тупо в историю писать она на пару уровней выше
-            # поняла, тогда можно просто открывать окно, в нём писать "АААААААААААААААААААА" и почему (мне наверное надо не только
-            # тру/фолс, но еще и строку с сообщением возращать?) Кстати, ащщаща кортеж))
-            # не надо кортеж. если пустая строка, то всё ок, если нет, то выведи ее хорошо. ты можешь сама сообщение выдавать
-
+        # if LogicManager.check_collisions(calendar, event_to_add):
+        #     data.extend(event_to_add)
+        data.extend(event_to_add)
+        
 class ChoiceWidget(QWidget):
     def __init__(self, day, time, title_list, department_list, parent):
         QWidget.__init__(self, parent)

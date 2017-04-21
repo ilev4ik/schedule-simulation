@@ -19,6 +19,3 @@ class LogicManager(QObject):
         print(new_event)
         show_error_message()
         return True
-
-    # показываю как коммитить!!!!!!!!!
-    # я вся внимание. ты в логике. никуда не переходи

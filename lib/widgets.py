@@ -190,7 +190,6 @@ class FormDelegate(QStyledItemDelegate):
         calendar = index.model().calendar
         data = calendar.matrix[row][col]
 
-        # TODO здесь проверяем коллизии после формочки
         event_to_add = editor.getNewEvent()
         if LogicManager.check_collisions(calendar, event_to_add):
             data.extend(event_to_add) # ваще всё по науке . Поняла, что сделали? да, взяли новое событие, если всё, дбавили.

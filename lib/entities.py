@@ -108,3 +108,4 @@ class Calendar(object):
         self.currentTime = 0.0
         self.matrix = matrix
         self.period = len(matrix) # кол-во столбцов TODO проверить это
+        print(self.period)

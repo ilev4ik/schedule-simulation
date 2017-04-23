@@ -14,5 +14,6 @@ def show_error_message(event: ScheduleEvent):
 class LogicManager(object):
     @staticmethod
     def check_collisions(calendar: Calendar, new_event):
-        show_error_message(new_event[0])
+        if new_event:
+            show_error_message(new_event)
         return True

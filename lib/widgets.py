@@ -181,8 +181,8 @@ class FormDelegate(QStyledItemDelegate):
 
         # TODO здесь проверяем коллизии после формочки
         event_to_add = editor.getNewEvent()
-        if LogicManager.check_collisions(calendar, event_to_add):
-            data.extend(event_to_add)
+        if LogicManager.check_collisions(calendar, event_to_add) and event_to_add:
+            data.append(event_to_add)
 
 class ChoiceWidget(QWidget):
     def __init__(self, day, time, title_list, department_list, parent):
@@ -217,7 +217,7 @@ class ChoiceWidget(QWidget):
 
     def __onPlus(self):
         self.form.exec()
-        self.__newEvent.append(self.form.getEvent())
+        self.__newEvent = self.form.getEvent()
 
     def getNewEvent(self):
         return self.__newEvent

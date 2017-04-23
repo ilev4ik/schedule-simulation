@@ -245,7 +245,8 @@ class ChoiceWidget(QWidget):
         dialog.setWindowTitle('Удаление события')
         dialog.exec()
 
-        self.event_list.remove(dialog.return_event)
+        if dialog.return_event:
+            self.event_list.remove(dialog.return_event)
 
     def __onEdit(self):
         dialog = TitleDialog(self.event_list)

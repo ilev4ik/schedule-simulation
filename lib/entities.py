@@ -24,7 +24,6 @@ class Employee(Human):
         Human.__init__(self, name, surname)
 
 
-
 class Department(object):
     def __init__(self, dep_name, boss=None, employee_list=None):
         object.__init__(self)
@@ -76,6 +75,8 @@ class ScheduleEvent(object):
         EMPL = 2
 
     def __init__(self, **kwargs):
+        self.__annotation = None
+        self.__title = None
         self.__init_args(kwargs)
 
     def __init_args(self, kwargs: dict):
@@ -95,12 +96,33 @@ class ScheduleEvent(object):
             elif key is 'type':
                 self.__type = value
             elif key is 'part_list':
-                self.part_list = value
+                self.__part_list = value
             else:
-                raise KeyError()
+                raise KeyError(key)
 
     def getTitle(self):
         return self.__title
+
+    def getAnnotation(self):
+        return self.__annotation
+
+    def getDuration(self):
+        return self.__duration
+
+    def getLocation(self):
+        return self.__location
+
+    def getType(self):
+        return self.__type
+
+    def getDay(self):
+        return self.__day
+
+    def getTime(self):
+        return self.__time
+
+    def getPartList(self):
+        return self.__part_list
 
 
 class Calendar(object):

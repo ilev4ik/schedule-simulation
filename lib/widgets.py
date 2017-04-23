@@ -229,15 +229,16 @@ class ChoiceWidget(QWidget):
         self.l = l
         self.setLayout(l)
 
-    def __onPlus(self):
-        self.form.exec()
-        self.__newEvent = self.form.getEvent()
-
     def getNewEvent(self):
         return self.__newEvent
 
     def getDeleteEvent(self):
         return self.__delete_event
+
+    def __onPlus(self):
+        self.form.exec()
+        self.__newEvent = self.form.getEvent()
+        self.hide()
 
     def __onMinus(self):
         dialog = TitleDialog(self.event_list)
@@ -250,6 +251,13 @@ class ChoiceWidget(QWidget):
         dialog = TitleDialog(self.event_list)
         dialog.setWindowTitle('Редактирование события')
         dialog.exec()
+
+        if dialog.return_event:
+            self.form.setInfo(dialog.return_event)
+            self.form.exec()
+            self.__newEvent = self.form.getEvent()
+            if self.__newEvent:
+                self.event_list.remove(dialog.return_event)
 
     def __onCancel(self):
         self.close()
@@ -284,6 +292,20 @@ class FormDialog(QDialog):
         self.bb_dialog.helpRequested.connect(self.__onPreview)
         self.bb_dialog.accepted.connect(self.__saveResults)
         self.bb_dialog.rejected.connect(self.__onClose)
+
+    def setInfo(self, event: ScheduleEvent):
+        self.le_name.setText(event.getTitle())
+        self.te_description.setText(event.getAnnotation())
+        self.cb_place.setCurrentText(event.getLocation())
+
+        type = event.getType()
+        if type == ScheduleEvent.Type.DEP:
+            self.rb_department.setChecked(True)
+        elif type == ScheduleEvent.Type.HEAD:
+            self.rb_head.setChecked(True)
+        else:
+            self.rb_workers.setChecked(True)
+
 
     def __onClose(self):
         self.event = []

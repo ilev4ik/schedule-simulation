@@ -146,12 +146,14 @@ class CalendarWidget(QTableView):
 
 
 class TitleDialog(QDialog):
-    def __init__(self, title_list):
+    def __init__(self, event_list):
         QDialog.__init__(self)
+        self.event_list = event_list
+        self.return_event = None
         layout = QVBoxLayout(self)
         self.cb_title = QComboBox()
-        for title in title_list:
-            self.cb_title.addItem(title)
+        for event in event_list:
+            self.cb_title.addItem(event.getTitle())
         db_cont = QDialogButtonBox()
         db_cont.addButton(QPushButton('Отмена'), QDialogButtonBox.RejectRole)
         db_cont.addButton(QPushButton('Выбрать'), QDialogButtonBox.AcceptRole)
@@ -160,6 +162,17 @@ class TitleDialog(QDialog):
         layout.addWidget(self.db_cont)
         self.setLayout(layout)
         self.setFixedWidth(400)
+
+        db_cont.rejected.connect(self.close)
+        db_cont.accepted.connect(self.__onReturn)
+
+    def __onReturn(self):
+        title = self.cb_title.currentText()
+        for event in self.event_list:
+            if event.getTitle() == title:
+                self.return_event = event
+        self.close()
+
 
 from lib.logic_manager import LogicManager
 class FormDelegate(QStyledItemDelegate):
@@ -171,7 +184,8 @@ class FormDelegate(QStyledItemDelegate):
         row = index.row()
         col = index.column()
         item = index.model().calendar.matrix[row][col]
-        return ChoiceWidget(col, row*100+1000, index.data().split('\n')[:-1], self.department_list, parent)
+        # index.data().split('\n')[:-1]
+        return ChoiceWidget(col, row*100+1000, item, self.department_list, parent)
 
     def setModelData(self, editor, model, index):
         row = index.row()
@@ -180,15 +194,15 @@ class FormDelegate(QStyledItemDelegate):
         data = calendar.matrix[row][col]
 
         event_to_add = editor.getNewEvent()
-        # if LogicManager.check_collisions(calendar, event_to_add):
-        #     data.extend(event_to_add)
-        data.extend(event_to_add)
-        
+        if LogicManager.check_collisions(calendar, event_to_add) and event_to_add:
+            data.append(event_to_add)
+
+
 class ChoiceWidget(QWidget):
-    def __init__(self, day, time, title_list, department_list, parent):
+    def __init__(self, day, time, event_list, department_list, parent):
         QWidget.__init__(self, parent)
         self.__newEvent = []
-        self.title_list = title_list
+        self.event_list = event_list
         self.setFocusPolicy(Qt.StrongFocus)
         self.__setUi()
 
@@ -215,22 +229,35 @@ class ChoiceWidget(QWidget):
         self.l = l
         self.setLayout(l)
 
-    def __onPlus(self):
-        self.form.exec()
-        self.__newEvent.append(self.form.getEvent())
-
     def getNewEvent(self):
         return self.__newEvent
 
+    def getDeleteEvent(self):
+        return self.__delete_event
+
+    def __onPlus(self):
+        self.form.exec()
+        self.__newEvent = self.form.getEvent()
+        self.hide()
+
     def __onMinus(self):
-        dialog = TitleDialog(self.title_list)
+        dialog = TitleDialog(self.event_list)
         dialog.setWindowTitle('Удаление события')
         dialog.exec()
 
+        self.event_list.remove(dialog.return_event)
+
     def __onEdit(self):
-        dialog = TitleDialog(self.title_list)
+        dialog = TitleDialog(self.event_list)
         dialog.setWindowTitle('Редактирование события')
         dialog.exec()
+
+        if dialog.return_event:
+            self.form.setInfo(dialog.return_event)
+            self.form.exec()
+            self.__newEvent = self.form.getEvent()
+            if self.__newEvent:
+                self.event_list.remove(dialog.return_event)
 
     def __onCancel(self):
         self.close()
@@ -265,6 +292,20 @@ class FormDialog(QDialog):
         self.bb_dialog.helpRequested.connect(self.__onPreview)
         self.bb_dialog.accepted.connect(self.__saveResults)
         self.bb_dialog.rejected.connect(self.__onClose)
+
+    def setInfo(self, event: ScheduleEvent):
+        self.le_name.setText(event.getTitle())
+        self.te_description.setText(event.getAnnotation())
+        self.cb_place.setCurrentText(event.getLocation())
+
+        type = event.getType()
+        if type == ScheduleEvent.Type.DEP:
+            self.rb_department.setChecked(True)
+        elif type == ScheduleEvent.Type.HEAD:
+            self.rb_head.setChecked(True)
+        else:
+            self.rb_workers.setChecked(True)
+
 
     def __onClose(self):
         self.event = []

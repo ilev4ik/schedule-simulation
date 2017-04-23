@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
 
     def __setDefaultState(self):
         self.params_dock.widget().getModel().uncheckAll()
-        self.params_dock.setEnabled(True)
+        self.params_dock.show()
         self.startAction.setEnabled(True)
         self.newAction.setEnabled(False)
         self.pauseAction.setEnabled(False)
@@ -113,7 +113,7 @@ class MainWindow(QMainWindow):
         self.calendar_widget.setFormData(checked_departments)
         self.setCentralWidget(self.calendar_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.filter_dock)
-        self.params_dock.setEnabled(False)
+        self.params_dock.hide()
         self.newAction.setEnabled(True)
         self.cancelAction.setEnabled(True)
         self.nextAction.setEnabled(True)

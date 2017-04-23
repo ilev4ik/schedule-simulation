@@ -86,6 +86,7 @@ class MainWindow(QMainWindow):
 
     def __onCancelAction(self):
         self.tabs.widget(0).addItem('Сбросить параметры моделирования')
+        self.calendar_widget.clear_widget()
         self.__setDefaultState()
 
     def __onResetAction(self):

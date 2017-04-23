@@ -129,11 +129,18 @@ class DepartmentModel(QAbstractListModel):
             self.dataChanged.emit(index, index)
         return True
 
-
+from .entities import Calendar
 class CalendarModel(QAbstractTableModel):
     def __init__(self, calendar):
         QAbstractTableModel.__init__(self)
         self.calendar = calendar
+
+    def clear_data(self):
+        cols = self.calendar.period
+
+        self.beginResetModel()
+        self.calendar = Calendar([[[] for i in range(0, cols)] for j in range(0, 9)])
+        self.endResetModel()
 
     def flags(self, index=QModelIndex()):
         if not index.isValid():

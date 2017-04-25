@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QMainWindow, QDockWidget, QTabWidget, \
     QListWidget, QAction, QStyle
 from PyQt5.QtGui import QKeySequence
 
+from lib.logic_manager import LogicManager
 from lib.widgets import ParametersWidget, FilterWidget, CalendarWidget
 from lib.entities import Department, Employee, ScheduleEvent, Firm, Human, Calendar
 
@@ -30,7 +31,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         MainWindow.departments_committed = pyqtSignal(list)
-
+        self.current_cell = {'row': 0, 'col': 0}
         data = self.__readDepartmentsData()
         self.firm = Firm(Human('Иван', 'Попов'), data)
 
@@ -123,8 +124,17 @@ class MainWindow(QMainWindow):
         self.pauseAction.setEnabled(False)
         self.filter_dock.show()
 
+    from lib.logic_manager import LogicManager
     def __onNextAction(self):
-        self.tabs.widget(0).addItem('Следующий шаг')
+        step = int(self.params_widget.cb_step.currentText().split()[0])
+        calendar = self.calendar_widget.getCalendar()
+        (rest_events, next_cell) = LogicManager.simulate_next_step(calendar, step, self.current_cell)
+        if next_cell is None:
+            self.tabs.widget(0).addItem('Моделирование завершено')
+        else:
+            self.calendar_widget.highlightCell(self.current_cell)
+            self.current_cell = next_cell
+            self.tabs.widget(0).addItem('Следующий шаг: ' + str(rest_events) + ' осталось событий')
 
     def __onFinishAction(self):
         self.tabs.widget(0).addItem('Завершить моделирование')

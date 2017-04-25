@@ -121,12 +121,22 @@ class FilterWidget(QWidget):
         self.ilv_departments.hide()
 
 from PyQt5.QtGui import QFont
+from PyQt5.QtCore import QItemSelectionModel
 class CalendarWidget(QTableView):
     def __init__(self, calendar, parent=None):
         QTableView.__init__(self, parent)
         self.setFont(QFont('Arial', 9, QFont.StyleItalic))
         self.setModel(CalendarModel(calendar))
         self.setHorizontalScrollMode(QAbstractItemView.ScrollPerItem)
+
+    def highlightCell(self, current_cell: dict):
+
+        row = current_cell['row']
+        col = current_cell['col']
+        index = self.model().index(row, col)
+        self.selectionModel().clearSelection()
+        self.selectionModel().select(index, QItemSelectionModel.Select)
+
 
     def setFormData(self, department_list):
         self.setItemDelegate(FormDelegate(department_list))
@@ -143,6 +153,9 @@ class CalendarWidget(QTableView):
     def clear_widget(self):
         self.clearSelection()
         self.model().clear_data()
+
+    def getCalendar(self):
+        return self.model().calendar
 
 
 class TitleDialog(QDialog):

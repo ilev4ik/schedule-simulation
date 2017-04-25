@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer, QThread
 from PyQt5.QtCore import pyqtSignal, QFile, QIODevice, QTextStream
 from PyQt5.QtWidgets import QMainWindow, QDockWidget, QTabWidget, \
     QListWidget, QAction, QStyle
@@ -7,6 +7,8 @@ from PyQt5.QtGui import QKeySequence
 from lib.logic_manager import LogicManager
 from lib.widgets import ParametersWidget, FilterWidget, CalendarWidget
 from lib.entities import Department, Employee, ScheduleEvent, Firm, Human, Calendar
+from lib.tools import Sleeper
+
 
 
 class MainWindow(QMainWindow):
@@ -31,7 +33,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         MainWindow.departments_committed = pyqtSignal(list)
-        self.current_cell = {'row': 0, 'col': 0}
         data = self.__readDepartmentsData()
         self.firm = Firm(Human('Иван', 'Попов'), data)
 
@@ -68,7 +69,7 @@ class MainWindow(QMainWindow):
         self.tabs = tabs
 
         self.__createActions()
-        self.__setDefaultState()
+        self.__onCancelAction()
 
         self.__createMenus()
         self.__createToolBars()
@@ -87,12 +88,13 @@ class MainWindow(QMainWindow):
 
     def __onCancelAction(self):
         self.tabs.widget(0).addItem('Сбросить параметры моделирования')
-        self.calendar_widget.clear_widget()
+        self.__onResetAction()
         self.__setDefaultState()
 
     def __onResetAction(self):
         self.tabs.widget(0).addItem('Очистить календарь')
         self.calendar_widget.clear_widget()
+        self.current_cell = {'row': 0, 'col': 0}
         self.repaint()
 
     def __onPauseAction(self):
@@ -130,6 +132,7 @@ class MainWindow(QMainWindow):
         step = int(self.params_widget.cb_step.currentText().split()[0])
         calendar = self.calendar_widget.getCalendar()
         (rest_events, next_cell) = LogicManager.simulate_next_step(calendar, step, self.current_cell)
+
         if next_cell is None:
             self.tabs.widget(0).addItem('Моделирование завершено')
         else:
@@ -137,8 +140,20 @@ class MainWindow(QMainWindow):
             self.current_cell = next_cell
             self.tabs.widget(0).addItem('Следующий шаг: ' + str(rest_events) + ' осталось событий')
 
+
     def __onFinishAction(self):
-        self.tabs.widget(0).addItem('Завершить моделирование')
+        self.tabs.widget(0).addItem('Завершить моделирование...')
+        width = len(self.calendar_widget.getCalendar().matrix[0])
+        height = len(self.calendar_widget.getCalendar().matrix)
+
+        # sleeper = Sleeper(self.__onNextAction)
+        for col_num in range(0, width, 1):
+            for row_num in range(0, height, 1):
+                self.__onNextAction()
+                # sleeper.start()
+                # sleeper.wait(1000)
+
+
 
     def __createActions(self):
         newAction = QAction('&Очистить календарь', self)

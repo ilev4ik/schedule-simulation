@@ -20,20 +20,12 @@ class LogicManager(object):
 
     @staticmethod
     def simulate_next_step(calendar: Calendar, step, current_cell: dict):
-        """
-
-        :param calendar of type Calendar
-        :param step 1 or 2
-        :param current_cell of type dict : {'row': i, 'col': j} where i, j are ints 
-        :return an array of [rest_events_number, next_cell]. Next cell has format of current_cell
-        if rest_event_number equals 0 then next_cell = None
-        """
         total_day_num = calendar.period
         current_day_num = current_cell['col'] + 1
-        current_time = current_cell['row'] + 1
+        current_time = current_cell['row'] + step
 
         if current_time + 1 <= 9:
-            current_cell['row'] += 1
+            current_cell['row'] += step
         else:
             if current_day_num + 1 <= total_day_num:
                 current_cell['col'] += 1
@@ -52,25 +44,3 @@ class LogicManager(object):
                 events_left += events_now
 
         return events_left, current_cell
-
-    """
-        days = calendar.period
-        hours = 9
-
-        new_day = current_cell['col']
-        new_time = current_cell['row'] + step
-
-        if new_day > days-1:
-            return 0, None
-        else:
-            new_cell = {'row': new_time, 'col': new_day}
-
-        # переход на след день
-        if new_time > 8:
-            new_time = 0
-            new_day += 1
-
-        events_left = 0
-
-
-"""
